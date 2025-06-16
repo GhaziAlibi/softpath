@@ -1,0 +1,31 @@
+[package]
+name = "softpath"
+version = "0.1.0"
+edition = "2021"
+authors = ["ALIBI Ghazu <ghazi.alibi@outlook.fr>"]
+description = "A human-friendly file and directory path manipulation library for Rust."
+license = "MIT"
+repository = "https://github.com/GhaziAlibi/softpath"
+documentation = "https://docs.rs/softpath"
+readme = "README.md"
+keywords = ["path", "filesystem", "utility", "io", "files"]
+categories = ["filesystem", "os"]
+rust-version = "1.70.0"
+
+[dependencies]
+thiserror = "1.0"
+home = "0.5"
+dirs = "6.0.0"
+# For Windows extended path support
+dunce = "1.0"  # For better path handling on Windows
+walkdir = "2.3" # For recursive operations
+
+[dev-dependencies]
+tempfile = "3.8"
+criterion = "0.5"
+pretty_assertions = "1.4"
+test-case = "3.1"
+
+[[bench]]
+name = "path_ops"
+harness = false

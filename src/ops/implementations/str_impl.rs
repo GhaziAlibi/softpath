@@ -1,0 +1,111 @@
+use std::fs;
+use std::path::{Path, PathBuf};
+use crate::error::SoftPathError;
+use crate::ops::PathExt;
+
+impl PathExt for &str {
+    fn into_path(self) -> Result<PathBuf, SoftPathError> {
+        let path = if let Some(path) = self.strip_prefix("~/").or_else(|| self.strip_prefix("~\\")) {
+            let home = dirs::home_dir().ok_or_else(|| {
+                SoftPathError::InvalidPath("Could not determine home directory.".to_string())
+            })?;
+            home.join(path)
+        } else {
+            PathBuf::from(self)
+        };
+        crate::utils::check_path_traversal(&path)?;
+        crate::utils::check_symlink_cycles(&path)?;
+        Ok(path)
+    }
+
+    fn exists(&self) -> bool {
+        self.into_path().map(|p| p.exists()).unwrap_or(false)
+    }
+
+    fn is_file(&self) -> bool {
+        self.into_path().map(|p| p.is_file()).unwrap_or(false)
+    }
+
+    fn is_dir(&self) -> bool {
+        self.into_path().map(|p| p.is_dir()).unwrap_or(false)
+    }
+
+    fn create_file(&self) -> Result<(), SoftPathError> {
+        let path = self.into_path()?;
+        path.create_file()
+    }
+
+    fn create_dir_all(&self) -> Result<(), SoftPathError> {
+        fs::create_dir_all(self.into_path()?).map_err(SoftPathError::from)
+    }
+
+    fn remove(&self) -> Result<(), SoftPathError> {
+        let path = self.into_path()?;
+        path.remove()
+    }
+
+    fn read_to_string(&self) -> Result<String, SoftPathError> {
+        let path = self.into_path()?;
+        fs::read_to_string(path).map_err(SoftPathError::from)
+    }
+
+    fn write_string(&self, contents: &str) -> Result<(), SoftPathError> {
+        let path = self.into_path()?;
+        path.write_string(contents)
+    }
+
+    fn copy_to<P: AsRef<Path>>(&self, dest: P) -> Result<(), SoftPathError> {
+        let from = self.into_path()?;
+        fs::copy(&from, dest)?;
+        Ok(())
+    }
+
+    fn move_to<P: AsRef<Path>>(&self, dest: P) -> Result<(), SoftPathError> {
+        let from = self.into_path()?;
+        fs::rename(&from, dest)?;
+        Ok(())
+    }
+
+    fn is_empty(&self) -> Result<bool, SoftPathError> {
+        let path = self.into_path()?;
+        path.is_empty()
+    }
+
+    fn is_hidden(&self) -> Result<bool, SoftPathError> {
+        let path = self.into_path()?;
+        path.is_hidden()
+    }
+
+    fn file_name(&self) -> Option<String> {
+        self.into_path()
+            .ok()
+            .as_ref()
+            .and_then(|p| p.as_path().file_name())
+            .and_then(|s| s.to_str())
+            .map(String::from)
+    }
+
+    fn extension(&self) -> Option<String> {
+        self.into_path()
+            .ok()
+            .as_ref()
+            .and_then(|p| p.as_path().extension())
+            .and_then(|s| s.to_str())
+            .map(String::from)
+    }
+
+    fn parent_name(&self) -> Option<String> {
+        self.into_path()
+            .ok()
+            .as_ref()
+            .and_then(|p| p.parent())
+            .and_then(|p| p.file_name())
+            .and_then(|s| s.to_str())
+            .map(String::from)
+    }
+
+    fn absolute(&self) -> Result<PathBuf, SoftPathError> {
+        let path = self.into_path()?;
+        Ok(fs::canonicalize(path)?)
+    }
+}
