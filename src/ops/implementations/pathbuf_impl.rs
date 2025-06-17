@@ -26,6 +26,8 @@ impl PathExt for PathBuf {
     }
 
     fn create_dir_all(&self) -> Result<(), SoftPathError> {
+        crate::utils::check_path_traversal(self)?;
+        crate::utils::check_symlink_cycles(self)?;
         fs::create_dir_all(self).map_err(SoftPathError::from)
     }
 
@@ -42,11 +44,17 @@ impl PathExt for PathBuf {
     }
 
     fn copy_to<P: AsRef<Path>>(&self, dest: P) -> Result<(), SoftPathError> {
+        let dest_path = dest.as_ref();
+        crate::utils::check_path_traversal(dest_path)?;
+        crate::utils::check_symlink_cycles(dest_path)?;
         fs::copy(self, dest)?;
         Ok(())
     }
 
     fn move_to<P: AsRef<Path>>(&self, dest: P) -> Result<(), SoftPathError> {
+        let dest_path = dest.as_ref();
+        crate::utils::check_path_traversal(dest_path)?;
+        crate::utils::check_symlink_cycles(dest_path)?;
         fs::rename(self, dest)?;
         Ok(())
     }

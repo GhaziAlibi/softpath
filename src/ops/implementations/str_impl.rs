@@ -56,12 +56,18 @@ impl PathExt for &str {
 
     fn copy_to<P: AsRef<Path>>(&self, dest: P) -> Result<(), SoftPathError> {
         let from = self.into_path()?;
+        let dest_path = dest.as_ref();
+        crate::utils::check_path_traversal(dest_path)?;
+        crate::utils::check_symlink_cycles(dest_path)?;
         fs::copy(&from, dest)?;
         Ok(())
     }
 
     fn move_to<P: AsRef<Path>>(&self, dest: P) -> Result<(), SoftPathError> {
         let from = self.into_path()?;
+        let dest_path = dest.as_ref();
+        crate::utils::check_path_traversal(dest_path)?;
+        crate::utils::check_symlink_cycles(dest_path)?;
         fs::rename(&from, dest)?;
         Ok(())
     }
