@@ -10,7 +10,11 @@ pub(crate) trait PathOps {
         let path = self.as_path().to_path_buf();
         crate::utils::check_path_traversal(&path)?;
         crate::utils::check_symlink_cycles(&path)?;
+        
+        // Validate parent directory separately to prevent TOCTOU
         if let Some(parent) = path.parent() {
+            crate::utils::check_path_traversal(parent)?;
+            crate::utils::check_symlink_cycles(parent)?;
             fs::create_dir_all(parent)?;
         }
         fs::File::create(path)?;
@@ -21,7 +25,11 @@ pub(crate) trait PathOps {
         let path = self.as_path().to_path_buf();
         crate::utils::check_path_traversal(&path)?;
         crate::utils::check_symlink_cycles(&path)?;
+        
+        // Validate parent directory separately to prevent TOCTOU
         if let Some(parent) = path.parent() {
+            crate::utils::check_path_traversal(parent)?;
+            crate::utils::check_symlink_cycles(parent)?;
             fs::create_dir_all(parent)?;
         }
         fs::write(path, contents)?;

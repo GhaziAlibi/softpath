@@ -87,12 +87,12 @@ impl PathExt for PathBuf {
     }
 
     fn absolute(&self) -> Result<PathBuf, SoftPathError> {
-        // First canonicalize the path to resolve any . or .. components
-        let canonical = fs::canonicalize(self).map_err(SoftPathError::Io)?;
+        // First run security checks on the original path to prevent TOCTOU
+        crate::utils::check_path_traversal(self)?;
+        crate::utils::check_symlink_cycles(self)?;
 
-        // Then run security checks on the resolved path
-        crate::utils::check_path_traversal(&canonical)?;
-        crate::utils::check_symlink_cycles(&canonical)?;
+        // Then canonicalize the path to resolve any . or .. components
+        let canonical = fs::canonicalize(self).map_err(SoftPathError::Io)?;
 
         Ok(canonical)
     }
