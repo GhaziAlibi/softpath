@@ -5,14 +5,23 @@ use crate::ops::PathExt;
 
 impl PathExt for &str {
     fn into_path(self) -> Result<PathBuf, SoftPathError> {
+        // First validate the input string for basic path traversal patterns
+        let input_path = PathBuf::from(self);
+        
         let path = if let Some(path) = self.strip_prefix("~/").or_else(|| self.strip_prefix("~\\")) {
+            // Validate the path component after tilde expansion before joining
+            let path_component = PathBuf::from(path);
+            crate::utils::check_path_traversal(&path_component)?;
+            
             let home = dirs::home_dir().ok_or_else(|| {
                 SoftPathError::InvalidPath("Could not determine home directory.".to_string())
             })?;
             home.join(path)
         } else {
-            PathBuf::from(self)
+            input_path
         };
+        
+        // Final validation of the complete path
         crate::utils::check_path_traversal(&path)?;
         crate::utils::check_symlink_cycles(&path)?;
         Ok(path)
