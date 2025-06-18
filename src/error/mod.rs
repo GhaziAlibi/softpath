@@ -38,7 +38,7 @@ pub enum SoftPathError {
 
     /// A symlink cycle was detected
     #[error("Symlink cycle detected in path: {0}")]
-    SymlinkCycleDetected(PathBuf),
+    SymlinkCycleDetected(String),
 
     /// Permission denied for the operation
     #[error("Permission denied: {0}")]

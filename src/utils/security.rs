@@ -80,7 +80,7 @@ pub(crate) fn check_path_traversal(path: &Path) -> Result<(), SoftPathError> {
         // If we ever try to go above root, that's a traversal attempt
         if depth < 0 {
             return Err(SoftPathError::PathTraversal(
-                absolute.to_string_lossy().into(),
+                sanitize_path_for_error(&absolute),
             ));
         }
     }
@@ -98,7 +98,7 @@ pub(crate) fn check_symlink_cycles(path: &Path) -> Result<(), SoftPathError> {
     while current.is_symlink() {
         if !visited.insert(current.clone()) {
             return Err(SoftPathError::SymlinkCycleDetected(
-                current,
+                sanitize_path_for_error(&current).into(),
             ));
         }
 
@@ -113,4 +113,21 @@ pub(crate) fn check_symlink_cycles(path: &Path) -> Result<(), SoftPathError> {
     }
 
     Ok(())
+}
+
+/// Sanitizes a path for inclusion in error messages to prevent information disclosure.
+/// In production builds, this should hide sensitive directory structures.
+fn sanitize_path_for_error(path: &Path) -> String {
+    #[cfg(debug_assertions)]
+    {
+        // In debug builds, show full path for development
+        path.to_string_lossy().into()
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        // In release builds, only show the filename to prevent information disclosure
+        path.file_name()
+            .map(|name| format!("<path>/{}", name.to_string_lossy()))
+            .unwrap_or_else(|| "<path>".to_string())
+    }
 }

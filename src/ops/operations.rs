@@ -15,9 +15,26 @@ pub(crate) trait PathOps {
         if let Some(parent) = path.parent() {
             crate::utils::check_path_traversal(parent)?;
             crate::utils::check_symlink_cycles(parent)?;
+            // Use create_dir_all which is more atomic than separate checks
             fs::create_dir_all(parent)?;
         }
-        fs::File::create(path)?;
+        
+        // Use OpenOptions for more controlled file creation
+        use std::fs::OpenOptions;
+        OpenOptions::new()
+            .write(true)
+            .create_new(true) // Fails if file already exists, preventing race conditions
+            .open(&path)
+            .map_err(|e| {
+                if e.kind() == std::io::ErrorKind::AlreadyExists {
+                    std::io::Error::new(
+                        std::io::ErrorKind::AlreadyExists,
+                        format!("File already exists: {}", path.display())
+                    )
+                } else {
+                    e
+                }
+            })?;
         Ok(())
     }
 
@@ -32,7 +49,20 @@ pub(crate) trait PathOps {
             crate::utils::check_symlink_cycles(parent)?;
             fs::create_dir_all(parent)?;
         }
-        fs::write(path, contents)?;
+        
+        // Use atomic write operation with temporary file to reduce TOCTOU risks
+        use std::io::Write;
+        let temp_path = path.with_extension("tmp");
+        
+        // Write to temporary file first
+        {
+            let mut temp_file = fs::File::create(&temp_path)?;
+            temp_file.write_all(contents.as_bytes())?;
+            temp_file.sync_all()?; // Ensure data is written to disk
+        }
+        
+        // Atomically rename temporary file to target (atomic on most filesystems)
+        fs::rename(&temp_path, &path)?;
         Ok(())
     }
 

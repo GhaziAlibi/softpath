@@ -22,6 +22,7 @@
 //! use softpath::{Config, PathExt};
 //! use std::path::PathBuf;
 //!
+//! # fn main() -> Result<(), softpath::SoftPathError> {
 //! // Create custom configuration
 //! let config = Config::new()
 //!     .with_max_path_depth(100)      // Limit path depth to 100 components
@@ -32,7 +33,15 @@
 //!
 //! // Now all operations will use these limits
 //! let path = PathBuf::from("some/path");
-//! path.create_file().expect("Failed to create file");
+//! match path.create_file() {
+//!     Ok(()) => println!("File created successfully"),
+//!     Err(e) if e.to_string().contains("already exists") => {
+//!         println!("File already exists, continuing...");
+//!     }
+//!     Err(e) => return Err(e),
+//! }
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! ## Basic Examples

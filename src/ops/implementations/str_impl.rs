@@ -28,15 +28,39 @@ impl PathExt for &str {
     }
 
     fn exists(&self) -> bool {
-        self.into_path().map(|p| p.exists()).unwrap_or(false)
+        match self.into_path() {
+            Ok(p) => p.exists(),
+            Err(_) => {
+                // Log validation failure in debug builds
+                #[cfg(debug_assertions)]
+                eprintln!("Warning: Path validation failed for exists() check on: {}", self);
+                false
+            }
+        }
     }
 
     fn is_file(&self) -> bool {
-        self.into_path().map(|p| p.is_file()).unwrap_or(false)
+        match self.into_path() {
+            Ok(p) => p.is_file(),
+            Err(_) => {
+                // Log validation failure in debug builds
+                #[cfg(debug_assertions)]
+                eprintln!("Warning: Path validation failed for is_file() check on: {}", self);
+                false
+            }
+        }
     }
 
     fn is_dir(&self) -> bool {
-        self.into_path().map(|p| p.is_dir()).unwrap_or(false)
+        match self.into_path() {
+            Ok(p) => p.is_dir(),
+            Err(_) => {
+                // Log validation failure in debug builds
+                #[cfg(debug_assertions)]
+                eprintln!("Warning: Path validation failed for is_dir() check on: {}", self);
+                false
+            }
+        }
     }
 
     fn create_file(&self) -> Result<(), SoftPathError> {
