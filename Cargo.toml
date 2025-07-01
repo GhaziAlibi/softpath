@@ -1,6 +1,6 @@
 [package]
 name = "softpath"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["ALIBI Ghazu <ghazi.alibi@outlook.fr>"]
 description = "A human-friendly file and directory path manipulation library for Rust."
