@@ -5,6 +5,13 @@ use crate::ops::PathExt;
 
 impl PathExt for &str {
     fn into_path(self) -> Result<PathBuf, SoftPathError> {
+        // Check for null bytes which are invalid in paths
+        if self.contains('\0') {
+            return Err(SoftPathError::InvalidPath(
+                "Path contains null bytes".to_string()
+            ));
+        }
+        
         // First validate the input string for basic path traversal patterns
         let input_path = PathBuf::from(self);
         
