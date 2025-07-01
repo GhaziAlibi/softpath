@@ -1,3 +1,7 @@
+[![Crates.io](https://img.shields.io/crates/v/softpath.svg)](https://crates.io/crates/softpath)[![Docs.rs](https://docs.rs/softpath/badge.svg)](https://docs.rs/softpath)[![Build Status](https://github.com/GhaziAlibi/softpath/actions/workflows/rust.yml/badge.svg)](https://github.com/GhaziAlibi/softpath/actions/workflows/rust.yml)[![License](https://img.shields.io/crates/l/softpath.svg)](https://crates.io/crates/softpath)[![Rust Version](https://img.shields.io/badge/rust-1.70+-blue.svg)](https://blog.rust-lang.org/)[![Downloads](https://img.shields.io/crates/d/softpath.svg)](https://crates.io/crates/softpath)
+[![🇵🇸 Free Palestine](https://img.shields.io/badge/🇵🇸_Free_Palestine-red.svg)](https://en.wikipedia.org/wiki/State_of_Palestine)
+
+
 # SoftPath
 
 A safe and intuitive path manipulation library for Rust that actually cares about security.
