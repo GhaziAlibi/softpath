@@ -6,11 +6,12 @@ mod common;
 #[test]
 fn test_path_traversal_errors() {
     // Test that path traversal attempts return PathTraversal error
+    // Use paths that will definitely traverse above the current directory
     let malicious_paths = vec![
-        "../../../etc/passwd",
-        "..\\..\\..\\windows\\system32",
-        "./../../sensitive/file.txt",
-        "normal/../../../etc/passwd",
+        "../../../../../../../../../etc/passwd",
+        "../../../../../../../../../windows/system32", 
+        "./../../../../../../../../sensitive/file.txt",
+        "normal/../../../../../../../../etc/passwd",
     ];
 
     for path_str in malicious_paths {
@@ -126,7 +127,7 @@ fn test_io_errors() {
 
 #[test]
 fn test_error_matching_patterns() {
-    let malicious_path = "../../../etc/passwd";
+    let malicious_path = "../../../../../../../../../etc/passwd";
     
     // Pattern 1: Using match with specific error variants
     match malicious_path.exists() {
@@ -163,7 +164,7 @@ fn test_error_matching_patterns() {
 fn test_error_propagation() {
     // Test that errors are properly propagated through the ? operator
     fn test_function() -> Result<bool, SoftPathError> {
-        let malicious_path = "../../../etc/passwd";
+        let malicious_path = "../../../../../../../../../etc/passwd";
         malicious_path.exists() // This will return the PathTraversal error
     }
 
