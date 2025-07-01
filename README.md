@@ -20,7 +20,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-softpath = "0.1.2"
+softpath = "0.2.0"
 ```
 
 ## Quick Start
