@@ -9,16 +9,19 @@ impl PathExt for &Path {
         Ok(self.to_path_buf())
     }
 
-    fn exists(&self) -> bool {
-        Path::exists(self)
+    fn exists(&self) -> Result<bool, SoftPathError> {
+        // Path is already validated, so we can just check existence
+        Ok(Path::exists(self))
     }
 
-    fn is_file(&self) -> bool {
-        Path::is_file(self)
+    fn is_file(&self) -> Result<bool, SoftPathError> {
+        // Path is already validated, so we can just check if it's a file
+        Ok(Path::is_file(self))
     }
 
-    fn is_dir(&self) -> bool {
-        Path::is_dir(self)
+    fn is_dir(&self) -> Result<bool, SoftPathError> {
+        // Path is already validated, so we can just check if it's a directory
+        Ok(Path::is_dir(self))
     }
 
     fn create_file(&self) -> Result<(), SoftPathError> {
@@ -67,26 +70,29 @@ impl PathExt for &Path {
         self.as_path().is_hidden_impl()
     }
 
-    fn file_name(&self) -> Option<String> {
-        self.as_path()
+    fn file_name(&self) -> Result<Option<String>, SoftPathError> {
+        // Path is already validated, so we can just get the file name
+        Ok(self.as_path()
             .file_name()
             .and_then(|s| s.to_str())
-            .map(String::from)
+            .map(String::from))
     }
 
-    fn extension(&self) -> Option<String> {
-        self.as_path()
+    fn extension(&self) -> Result<Option<String>, SoftPathError> {
+        // Path is already validated, so we can just get the extension
+        Ok(self.as_path()
             .extension()
             .and_then(|s| s.to_str())
-            .map(String::from)
+            .map(String::from))
     }
 
-    fn parent_name(&self) -> Option<String> {
-        self.as_path()
+    fn parent_name(&self) -> Result<Option<String>, SoftPathError> {
+        // Path is already validated, so we can just get the parent name
+        Ok(self.as_path()
             .parent()
             .and_then(Path::file_name)
             .and_then(|s| s.to_str())
-            .map(String::from)
+            .map(String::from))
     }
 
     fn absolute(&self) -> Result<PathBuf, SoftPathError> {

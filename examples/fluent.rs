@@ -21,7 +21,7 @@ fn main() -> Result<(), SoftPathError> {
     println!("2. File content: {}", content);
 
     // Example 3: Chain multiple checks
-    let file_status = if settings_path.exists() && settings_path.is_file() {
+    let file_status = if settings_path.exists()? && settings_path.is_file()? {
         "exists and is a file"
     } else {
         "does not exist or is not a file"
@@ -40,7 +40,7 @@ fn main() -> Result<(), SoftPathError> {
     source.move_to(&target)?;
     println!(
         "5. File moved successfully: {}",
-        !source.exists() && target.exists()
+        !source.exists()? && target.exists()?
     );
 
     // Example 6: Recursive cleanup
@@ -62,7 +62,7 @@ fn main() -> Result<(), SoftPathError> {
     }
 
     // Final cleanup
-    if base_dir.exists() {
+    if base_dir.exists()? {
         base_dir.remove()?;
     }
 

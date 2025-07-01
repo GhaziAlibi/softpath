@@ -9,16 +9,25 @@ impl PathExt for PathBuf {
         Ok(self)
     }
 
-    fn exists(&self) -> bool {
-        self.as_path().exists()
+    fn exists(&self) -> Result<bool, SoftPathError> {
+        // First validate the path
+        crate::utils::check_path_traversal(self)?;
+        crate::utils::check_symlink_cycles(self)?;
+        Ok(self.as_path().exists())
     }
 
-    fn is_file(&self) -> bool {
-        self.as_path().is_file()
+    fn is_file(&self) -> Result<bool, SoftPathError> {
+        // First validate the path
+        crate::utils::check_path_traversal(self)?;
+        crate::utils::check_symlink_cycles(self)?;
+        Ok(self.as_path().is_file())
     }
 
-    fn is_dir(&self) -> bool {
-        self.as_path().is_dir()
+    fn is_dir(&self) -> Result<bool, SoftPathError> {
+        // First validate the path
+        crate::utils::check_path_traversal(self)?;
+        crate::utils::check_symlink_cycles(self)?;
+        Ok(self.as_path().is_dir())
     }
 
     fn create_file(&self) -> Result<(), SoftPathError> {
@@ -67,23 +76,32 @@ impl PathExt for PathBuf {
         self.as_path().is_hidden_impl()
     }
 
-    fn file_name(&self) -> Option<String> {
-        Path::file_name(self)
+    fn file_name(&self) -> Result<Option<String>, SoftPathError> {
+        // First validate the path
+        crate::utils::check_path_traversal(self)?;
+        crate::utils::check_symlink_cycles(self)?;
+        Ok(Path::file_name(self)
             .and_then(|s| s.to_str())
-            .map(String::from)
+            .map(String::from))
     }
 
-    fn extension(&self) -> Option<String> {
-        Path::extension(self)
+    fn extension(&self) -> Result<Option<String>, SoftPathError> {
+        // First validate the path
+        crate::utils::check_path_traversal(self)?;
+        crate::utils::check_symlink_cycles(self)?;
+        Ok(Path::extension(self)
             .and_then(|s| s.to_str())
-            .map(String::from)
+            .map(String::from))
     }
 
-    fn parent_name(&self) -> Option<String> {
-        Path::parent(self)
+    fn parent_name(&self) -> Result<Option<String>, SoftPathError> {
+        // First validate the path
+        crate::utils::check_path_traversal(self)?;
+        crate::utils::check_symlink_cycles(self)?;
+        Ok(Path::parent(self)
             .and_then(Path::file_name)
             .and_then(|s| s.to_str())
-            .map(String::from)
+            .map(String::from))
     }
 
     fn absolute(&self) -> Result<PathBuf, SoftPathError> {

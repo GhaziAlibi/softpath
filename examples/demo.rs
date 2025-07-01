@@ -11,15 +11,15 @@ fn main() -> Result<(), SoftPathError> {
 
     // Create directory and check existence
     test_dir.create_dir_all()?;
-    assert!(test_dir.exists());
-    assert!(test_dir.is_dir());
+    assert!(test_dir.exists()?);
+    assert!(test_dir.is_dir()?);
     println!("2. Created directory and verified its existence");
 
     // Create a file in the directory
     let file_path = test_dir.join("hello.txt");
     file_path.create_file()?;
-    assert!(file_path.exists());
-    assert!(file_path.is_file());
+    assert!(file_path.exists()?);
+    assert!(file_path.is_file()?);
     println!("3. Created file: {:?}", file_path);
 
     // Write content to the file
@@ -46,20 +46,20 @@ fn main() -> Result<(), SoftPathError> {
     // Copy the file
     let copy_dest = backup_dir.join("data-backup.txt");
     source_file.copy_to(&copy_dest)?;
-    assert!(copy_dest.exists());
+    assert!(copy_dest.exists()?);
     println!("7. Copied file to: {:?}", copy_dest);
 
     // Move the file
     let move_dest = backup_dir.join("data-final.txt");
     source_file.move_to(&move_dest)?;
-    assert!(!source_file.exists());
-    assert!(move_dest.exists());
+    assert!(!source_file.exists()?);
+    assert!(move_dest.exists()?);
     println!("8. Moved file to: {:?}", move_dest);
 
     // Clean up - remove the whole test directory
     println!("\nCleaning up...");
     test_dir.remove()?;
-    assert!(!test_dir.exists());
+    assert!(!test_dir.exists()?);
     println!("Successfully removed test directory and all its contents");
 
     Ok(())

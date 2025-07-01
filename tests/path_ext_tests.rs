@@ -25,7 +25,7 @@ fn setup_test_dir() -> PathBuf {
     ));
 
     // Clean up any existing directory (shouldn't exist due to unique name)
-    if test_dir.exists() {
+    if test_dir.exists().unwrap_or(false) {
         let _ = fs::remove_dir_all(&test_dir);
     }
 
@@ -63,33 +63,33 @@ fn cleanup_test_dir(test_dir: &PathBuf) {
 #[test]
 fn test_path_creation() {
     let test_dir = setup_test_dir();
-    assert!(test_dir.exists(), "Base test directory should exist");
+    assert!(test_dir.exists().unwrap(), "Base test directory should exist");
     assert!(
-        test_dir.is_dir(),
+        test_dir.is_dir().unwrap(),
         "Base test directory should be a directory"
     );
 
     // Test nested directory creation
     let config_dir = test_dir.join("config");
     assert!(
-        !config_dir.exists(),
+        !config_dir.exists().unwrap(),
         "Config directory should not exist yet"
     );
     config_dir.create_dir_all().unwrap();
     assert!(
-        config_dir.exists(),
+        config_dir.exists().unwrap(),
         "Config directory should exist after creation"
     );
     assert!(
-        config_dir.is_dir(),
+        config_dir.is_dir().unwrap(),
         "Config directory should be a directory"
     );
 
     // Test creating directory with existing parent
     let sub_config = config_dir.join("subdir");
     sub_config.create_dir_all().unwrap();
-    assert!(sub_config.exists(), "Subdirectory should exist");
-    assert!(sub_config.is_dir(), "Subdirectory should be a directory");
+    assert!(sub_config.exists().unwrap(), "Subdirectory should exist");
+    assert!(sub_config.is_dir().unwrap(), "Subdirectory should be a directory");
 
     cleanup_test_dir(&test_dir);
 }
@@ -97,13 +97,13 @@ fn test_path_creation() {
 #[test]
 fn test_file_operations() -> Result<(), SoftPathError> {
     let test_dir = setup_test_dir();
-    assert!(test_dir.exists(), "Test directory should exist");
+    assert!(test_dir.exists()?, "Test directory should exist");
 
     // Create a test file
     let file_path = test_dir.join("test.txt");
     file_path.create_file()?;
-    assert!(file_path.exists(), "File should exist after creation");
-    assert!(file_path.is_file(), "Should be a file");
+    assert!(file_path.exists()?, "File should exist after creation");
+    assert!(file_path.is_file()?, "Should be a file");
 
     // Write and read content
     let content = "Hello, SoftPath!";
@@ -123,13 +123,13 @@ fn test_copy_and_move() {
     let source = test_dir.join("source.txt");
     source.create_file().unwrap(); // Create the file first
     source.write_string("test content").unwrap();
-    assert!(source.exists(), "Source file should exist");
+    assert!(source.exists().unwrap(), "Source file should exist");
 
     // Test copy
     let copy_dest = test_dir.join("copied.txt");
     source.copy_to(&copy_dest).unwrap();
-    assert!(copy_dest.exists(), "Copied file should exist");
-    assert!(source.exists(), "Source file should still exist after copy");
+    assert!(copy_dest.exists().unwrap(), "Copied file should exist");
+    assert!(source.exists().unwrap(), "Source file should still exist after copy");
     assert_eq!(
         source.read_to_string().unwrap(),
         copy_dest.read_to_string().unwrap(),
@@ -139,8 +139,8 @@ fn test_copy_and_move() {
     // Test move
     let move_dest = test_dir.join("moved.txt");
     source.move_to(&move_dest).unwrap();
-    assert!(!source.exists(), "Source file should not exist after move");
-    assert!(move_dest.exists(), "Moved file should exist");
+    assert!(!source.exists().unwrap(), "Source file should not exist after move");
+    assert!(move_dest.exists().unwrap(), "Moved file should exist");
     assert_eq!(
         "test content",
         move_dest.read_to_string().unwrap(),
@@ -157,12 +157,12 @@ fn test_nested_directories() {
     // Create nested directory structure
     let nested_dir = test_dir.join("deeply").join("nested").join("dir");
     nested_dir.create_dir_all().unwrap();
-    assert!(nested_dir.exists());
+    assert!(nested_dir.exists().unwrap());
 
     // Create file in nested directory
     let nested_file = nested_dir.join("test.txt");
     nested_file.create_file().unwrap();
-    assert!(nested_file.exists());
+    assert!(nested_file.exists().unwrap());
 
     cleanup_test_dir(&test_dir);
 }
@@ -179,13 +179,13 @@ fn test_directory_removal() {
 
     // Test recursive removal
     test_dir.remove().unwrap();
-    assert!(!test_dir.exists());
+    assert!(!test_dir.exists().unwrap());
 }
 
 #[test]
 fn test_string_path_operations() -> Result<(), SoftPathError> {
     let test_dir = setup_test_dir();
-    assert!(test_dir.exists(), "Test directory should exist");
+    assert!(test_dir.exists().unwrap(), "Test directory should exist");
 
     // Test string-based operations using platform-specific separator
     let file_path = test_dir
@@ -197,8 +197,8 @@ fn test_string_path_operations() -> Result<(), SoftPathError> {
     // Test with string slice
     let file_ref: &str = &file_path;
     file_ref.create_file()?;
-    assert!(file_ref.exists(), "File should exist");
-    assert!(file_ref.is_file(), "Should be a file");
+    assert!(file_ref.exists()?, "File should exist");
+    assert!(file_ref.is_file()?, "Should be a file");
 
     // Test content operations with string paths
     file_ref.write_string("test content")?;
@@ -247,7 +247,7 @@ fn test_error_handling() -> Result<(), SoftPathError> {
     let nested_file = test_dir.join("new_dir").join("file.txt");
     nested_file.write_string("test")?;
     assert!(
-        nested_file.exists(),
+        nested_file.exists().unwrap(),
         "File should be created in new directory"
     );
 
@@ -278,7 +278,7 @@ fn test_unix_specific_paths() {
     // Test absolute path
     let abs_path = test_dir.join("unix_test.txt");
     abs_path.create_file().unwrap();
-    assert!(abs_path.exists());
+    assert!(abs_path.exists().unwrap());
 
     cleanup_test_dir(&test_dir);
 }
@@ -291,12 +291,12 @@ fn test_windows_specific_paths() {
     // Test Windows-style paths
     let file_path = test_dir.join("windows_test.txt");
     file_path.create_file().unwrap();
-    assert!(file_path.exists());
+    assert!(file_path.exists().unwrap());
 
     // Test path with spaces
     let space_path = test_dir.join("with spaces.txt");
     space_path.create_file().unwrap();
-    assert!(space_path.exists());
+    assert!(space_path.exists().unwrap());
 
     cleanup_test_dir(&test_dir);
 }
@@ -314,7 +314,7 @@ fn test_concurrent_operations() {
         let thread_file = dir_clone.join("thread.txt");
         thread_file.create_file()?;
         thread_file.write_string("thread content")?;
-        assert!(thread_file.exists());
+        assert!(thread_file.exists()?);
         Ok(())
     });
 
@@ -322,7 +322,7 @@ fn test_concurrent_operations() {
     let main_file = test_dir.join("main.txt");
     main_file.create_file().unwrap();
     main_file.write_string("main content").unwrap();
-    assert!(main_file.exists());
+    assert!(main_file.exists().unwrap());
 
     // Wait for thread to complete
     handle.join().unwrap().unwrap();
@@ -403,21 +403,21 @@ fn test_path_components() {
     let file_path = test_dir.join("parent_dir").join("test.txt");
 
     // Test file_name
-    assert_eq!(file_path.file_name(), Some("test.txt".to_string()));
+    assert_eq!(file_path.file_name().unwrap(), Some("test.txt".to_string()));
 
     // Test extension
-    assert_eq!(file_path.extension(), Some("txt".to_string()));
+    assert_eq!(file_path.extension().unwrap(), Some("txt".to_string()));
 
     // Test parent_name
-    assert_eq!(file_path.parent_name(), Some("parent_dir".to_string()));
+    assert_eq!(file_path.parent_name().unwrap(), Some("parent_dir".to_string()));
 
     // Test path without extension
     let no_ext_path = test_dir.join("file_without_extension");
     assert_eq!(
-        no_ext_path.file_name(),
+        no_ext_path.file_name().unwrap(),
         Some("file_without_extension".to_string())
     );
-    assert_eq!(no_ext_path.extension(), None);
+    assert_eq!(no_ext_path.extension().unwrap(), None);
 
     cleanup_test_dir(&test_dir);
 }

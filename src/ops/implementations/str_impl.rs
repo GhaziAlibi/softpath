@@ -27,40 +27,22 @@ impl PathExt for &str {
         Ok(path)
     }
 
-    fn exists(&self) -> bool {
-        match self.into_path() {
-            Ok(p) => p.exists(),
-            Err(_) => {
-                // Log validation failure in debug builds
-                #[cfg(debug_assertions)]
-                eprintln!("Warning: Path validation failed for exists() check on: {}", self);
-                false
-            }
-        }
+    fn exists(&self) -> Result<bool, SoftPathError> {
+        // Convert to path and validate, then check existence
+        let path = self.into_path()?;
+        Ok(path.exists()?)
     }
 
-    fn is_file(&self) -> bool {
-        match self.into_path() {
-            Ok(p) => p.is_file(),
-            Err(_) => {
-                // Log validation failure in debug builds
-                #[cfg(debug_assertions)]
-                eprintln!("Warning: Path validation failed for is_file() check on: {}", self);
-                false
-            }
-        }
+    fn is_file(&self) -> Result<bool, SoftPathError> {
+        // Convert to path and validate, then check if it's a file
+        let path = self.into_path()?;
+        Ok(path.is_file()?)
     }
 
-    fn is_dir(&self) -> bool {
-        match self.into_path() {
-            Ok(p) => p.is_dir(),
-            Err(_) => {
-                // Log validation failure in debug builds
-                #[cfg(debug_assertions)]
-                eprintln!("Warning: Path validation failed for is_dir() check on: {}", self);
-                false
-            }
-        }
+    fn is_dir(&self) -> Result<bool, SoftPathError> {
+        // Convert to path and validate, then check if it's a directory
+        let path = self.into_path()?;
+        Ok(path.is_dir()?)
     }
 
     fn create_file(&self) -> Result<(), SoftPathError> {
@@ -115,32 +97,31 @@ impl PathExt for &str {
         path.is_hidden()
     }
 
-    fn file_name(&self) -> Option<String> {
-        self.into_path()
-            .ok()
-            .as_ref()
-            .and_then(|p| p.as_path().file_name())
+    fn file_name(&self) -> Result<Option<String>, SoftPathError> {
+        // Convert to path and validate, then get the file name
+        let path = self.into_path()?;
+        Ok(path.as_path()
+            .file_name()
             .and_then(|s| s.to_str())
-            .map(String::from)
+            .map(String::from))
     }
 
-    fn extension(&self) -> Option<String> {
-        self.into_path()
-            .ok()
-            .as_ref()
-            .and_then(|p| p.as_path().extension())
+    fn extension(&self) -> Result<Option<String>, SoftPathError> {
+        // Convert to path and validate, then get the extension
+        let path = self.into_path()?;
+        Ok(path.as_path()
+            .extension()
             .and_then(|s| s.to_str())
-            .map(String::from)
+            .map(String::from))
     }
 
-    fn parent_name(&self) -> Option<String> {
-        self.into_path()
-            .ok()
-            .as_ref()
-            .and_then(|p| p.parent())
+    fn parent_name(&self) -> Result<Option<String>, SoftPathError> {
+        // Convert to path and validate, then get the parent name
+        let path = self.into_path()?;
+        Ok(path.parent()
             .and_then(|p| p.file_name())
             .and_then(|s| s.to_str())
-            .map(String::from)
+            .map(String::from))
     }
 
     fn absolute(&self) -> Result<PathBuf, SoftPathError> {

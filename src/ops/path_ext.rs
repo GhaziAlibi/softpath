@@ -13,13 +13,34 @@ pub trait PathExt {
     fn into_path(self) -> Result<PathBuf, SoftPathError>;
 
     /// Returns true if the path exists.
-    fn exists(&self) -> bool;
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if:
+    /// - The path contains invalid characters
+    /// - The path contains directory traversal attempts
+    /// - The path contains symlink cycles
+    fn exists(&self) -> Result<bool, SoftPathError>;
 
     /// Returns true if the path points to a regular file.
-    fn is_file(&self) -> bool;
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if:
+    /// - The path contains invalid characters
+    /// - The path contains directory traversal attempts
+    /// - The path contains symlink cycles
+    fn is_file(&self) -> Result<bool, SoftPathError>;
 
     /// Returns true if the path points to a directory.
-    fn is_dir(&self) -> bool;
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if:
+    /// - The path contains invalid characters
+    /// - The path contains directory traversal attempts
+    /// - The path contains symlink cycles
+    fn is_dir(&self) -> Result<bool, SoftPathError>;
 
     /// Creates a new, empty file at this path.
     ///
@@ -111,13 +132,34 @@ pub trait PathExt {
     fn is_hidden(&self) -> Result<bool, SoftPathError>;
 
     /// Returns the file name as a String, or None if the path terminates in '..' or '.'.
-    fn file_name(&self) -> Option<String>;
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if:
+    /// - The path contains invalid characters
+    /// - The path contains directory traversal attempts
+    /// - The path contains symlink cycles
+    fn file_name(&self) -> Result<Option<String>, SoftPathError>;
 
     /// Returns the extension of the file as a String, or None if there is no extension.
-    fn extension(&self) -> Option<String>;
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if:
+    /// - The path contains invalid characters
+    /// - The path contains directory traversal attempts
+    /// - The path contains symlink cycles
+    fn extension(&self) -> Result<Option<String>, SoftPathError>;
 
     /// Returns the name of the parent directory as a String, or None if there is no parent.
-    fn parent_name(&self) -> Option<String>;
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if:
+    /// - The path contains invalid characters
+    /// - The path contains directory traversal attempts
+    /// - The path contains symlink cycles
+    fn parent_name(&self) -> Result<Option<String>, SoftPathError>;
 
     /// Returns the absolute path with all components normalized.
     ///
