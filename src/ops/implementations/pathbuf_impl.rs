@@ -45,6 +45,8 @@ impl PathExt for PathBuf {
     }
 
     fn read_to_string(&self) -> Result<String, SoftPathError> {
+        crate::utils::check_path_traversal(self)?;
+        crate::utils::check_symlink_cycles(self)?;
         fs::read_to_string(self).map_err(SoftPathError::from)
     }
 
@@ -53,17 +55,33 @@ impl PathExt for PathBuf {
     }
 
     fn copy_to<P: AsRef<Path>>(&self, dest: P) -> Result<(), SoftPathError> {
+        crate::utils::check_path_traversal(self)?;
+        crate::utils::check_symlink_cycles(self)?;
         let dest_path = dest.as_ref();
         crate::utils::check_path_traversal(dest_path)?;
         crate::utils::check_symlink_cycles(dest_path)?;
+        if dest_path.exists() {
+            return Err(SoftPathError::Io(std::io::Error::new(
+                std::io::ErrorKind::AlreadyExists,
+                format!("Destination already exists: {}", dest_path.display()),
+            )));
+        }
         fs::copy(self, dest)?;
         Ok(())
     }
 
     fn move_to<P: AsRef<Path>>(&self, dest: P) -> Result<(), SoftPathError> {
+        crate::utils::check_path_traversal(self)?;
+        crate::utils::check_symlink_cycles(self)?;
         let dest_path = dest.as_ref();
         crate::utils::check_path_traversal(dest_path)?;
         crate::utils::check_symlink_cycles(dest_path)?;
+        if dest_path.exists() {
+            return Err(SoftPathError::Io(std::io::Error::new(
+                std::io::ErrorKind::AlreadyExists,
+                format!("Destination already exists: {}", dest_path.display()),
+            )));
+        }
         fs::rename(self, dest)?;
         Ok(())
     }
