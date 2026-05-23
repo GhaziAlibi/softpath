@@ -111,6 +111,7 @@ pub trait PathExt {
     /// - The source path does not exist
     /// - The destination path already exists
     /// - The user lacks permissions
+    /// - Any parent directories of the destination are missing
     fn move_to<P: AsRef<Path>>(&self, dest: P) -> Result<(), SoftPathError>;
 
     /// Returns true if the path points to an empty file or directory.

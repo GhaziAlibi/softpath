@@ -126,6 +126,15 @@ fn test_io_errors() {
 }
 
 #[test]
+fn test_read_to_string_path_traversal_error() {
+    let malicious_path = "../../../../../../../../../etc/passwd";
+    assert!(matches!(
+        malicious_path.read_to_string(),
+        Err(SoftPathError::PathTraversal(_))
+    ));
+}
+
+#[test]
 fn test_error_matching_patterns() {
     let malicious_path = "../../../../../../../../../etc/passwd";
     

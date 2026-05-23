@@ -60,6 +60,34 @@ fn test_copy_and_move() {
 }
 
 #[test]
+fn test_copy_and_move_reject_existing_destination() -> Result<(), SoftPathError> {
+    let test_dir = setup_test_dir();
+
+    let source = test_dir.join("source.txt");
+    source.write_string("source content")?;
+
+    let existing_copy_dest = test_dir.join("existing_copy.txt");
+    existing_copy_dest.write_string("existing content")?;
+    let copy_err = source.copy_to(&existing_copy_dest).unwrap_err();
+    assert!(matches!(
+        copy_err,
+        SoftPathError::Io(ref e) if e.kind() == std::io::ErrorKind::AlreadyExists
+    ));
+
+    let existing_move_dest = test_dir.join("existing_move.txt");
+    existing_move_dest.write_string("existing content")?;
+    let move_err = source.move_to(&existing_move_dest).unwrap_err();
+    assert!(matches!(
+        move_err,
+        SoftPathError::Io(ref e) if e.kind() == std::io::ErrorKind::AlreadyExists
+    ));
+    assert!(source.exists()?);
+
+    cleanup_test_dir(&test_dir);
+    Ok(())
+}
+
+#[test]
 fn test_is_empty() -> Result<(), SoftPathError> {
     let test_dir = setup_test_dir();
 

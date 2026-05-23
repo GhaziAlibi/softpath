@@ -63,6 +63,9 @@
 //!
 //! // Copy to backup location
 //! let backup = backup_path.join("app.json").into_path()?;
+//! if backup.exists()? {
+//!     backup.remove()?;
+//! }
 //! config_file.copy_to(&backup)?;
 //! # Ok(())
 //! # }

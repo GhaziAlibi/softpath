@@ -41,6 +41,9 @@ fn main() -> Result<(), softpath::SoftPathError> {
 
     // Copy it somewhere else
     let backup = "~/config/backup/app.json".into_path()?;
+    if backup.exists()? {
+        backup.remove()?;
+    }
     config_file.copy_to(&backup)?;
 
     // Create directories as needed
