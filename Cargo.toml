@@ -2,7 +2,7 @@
 name = "softpath"
 version = "0.3.0"
 edition = "2021"
-authors = ["ALIBI Ghazu <ghazi.alibi@outlook.fr>"]
+authors = ["ALIBI Ghazi <ghazi.alibi@outlook.fr>"]
 description = "A human-friendly file and directory path manipulation library for Rust."
 license = "MIT"
 repository = "https://github.com/GhaziAlibi/softpath"
